@@ -7,6 +7,7 @@
 #include <random>
 #include <algorithm>
 #include <functional>
+#include <map>
 
 using namespace std;
 
@@ -33,6 +34,50 @@ public:
                 total += count_char * linear_combination[i];
             }
             return total;
+        };
+        
+        return Invariant(test_func, name);
+    }
+    static Invariant get_matrix_invariant(const string& name) {
+        vector<vector<int>> zero_matrix = {{0,0,0}, {0,0,0}, {0,0,0}};
+        vector<vector<int>> identity_matrix = {{1,0,0}, {0,1,0}, {0,0,1}};
+        vector<vector<int>> S1 = {{0,1,0}, {1,0,0}, {0,0,1}};
+        vector<vector<int>> S2 = {{1,0,0}, {0,0,1}, {0,1,0}};
+        
+        map<char, vector<vector<int>>> char_to_matrix = {
+            {'a', zero_matrix}, {'c', zero_matrix},
+            {'b', identity_matrix}, {'q', identity_matrix},
+            {'d', S1}, {'p', S2}
+        };
+        
+        function<int(const string&)> test_func = [char_to_matrix](const string& word) {
+            vector<vector<int>> result = {{1,0,0}, {0,1,0}, {0,0,1}};
+            
+            auto multiply_matrices = [](const vector<vector<int>>& a, 
+                                      const vector<vector<int>>& b) -> vector<vector<int>> {
+                vector<vector<int>> c(3, vector<int>(3, 0));
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        for (int k = 0; k < 3; k++) {
+                            c[i][j] += a[i][k] * b[k][j];
+                        }
+                    }
+                }
+                return c;
+            };
+            
+            for (char c : word) {
+                auto it = char_to_matrix.find(c);
+                if (it != char_to_matrix.end()) {
+                    result = multiply_matrices(result, it->second);
+                }
+            }
+        
+            int matrix_trace = 0;
+            for (int i = 0; i < 3; i++) {
+                matrix_trace+=result[i][i];
+            }
+            return matrix_trace;
         };
         
         return Invariant(test_func, name);
@@ -219,6 +264,7 @@ public:
             [](const string& word) { return count(word.begin(), word.end(), 'c') % 2; }, 
             "I3"
         ));
+        invariants.push_back(Invariant::get_matrix_invariant("I4"));
 
         Invariant::test_system_list(invariants, get_original_system(), "T");
         cout << endl;
