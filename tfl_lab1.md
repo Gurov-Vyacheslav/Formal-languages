@@ -5,14 +5,12 @@
 
 Исходная система правил переписывания (SRS) $\mathcal{T}$:
 
-$$
-\begin{aligned}
-1. &\quad apbc \to caqdbapbap \\
-2. &\quad paqd \to daqdbapbap \\
-3. &\quad ccpp \to adaqdqa \\
-4. &\quad dpd \to pdp
-\end{aligned}
-$$
+
+1. $apbc \to caqdbapbap$  
+2. $paqd \to daqdbapbap$  
+3. $ccpp \to adaqdqa$  
+4. $dpd \to pdp$
+
 
 ## Доказательство завершимости системы переписывания
 
@@ -132,8 +130,8 @@ $$
 где $\mathbf{0}$ — нулевая матрица, $I$ — единичная матрица, а $S_1$, $S_2$ — матрицы транспозиций:
 
 $$
-S_1 = \begin{pmatrix} 0&1&0\\1&0&0\\0&0&1 \end{pmatrix},\quad
-S_2 = \begin{pmatrix} 1&0&0\\0&0&1\\0&1&0 \end{pmatrix}.
+S_1 = \begin{pmatrix} 0 & 1 & 0 \\ 1 & 0 & 0 \\ 0 & 0 & 1 \end{pmatrix},\quad
+S_2 = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 0 & 1 \\ 0 & 1 & 0 \end{pmatrix}.
 $$
 
 Инвариант $I_4(w)$ вычисляется как след (сумма диагональных элементов) матрицы $\Phi(w)$.
