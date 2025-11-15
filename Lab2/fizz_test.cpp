@@ -42,9 +42,10 @@ struct AFA {
             sym_succ = delta(q, a);
         }
 
-        if (at_end && accepting.count(q)) return memo[key] = true;
 
         if (typ == "OR") {
+            if (at_end && accepting.count(q)) return memo[key] = true;
+
             for (auto &p : eps_succ)
                 if (accepts_helper(p, pos, word, memo))
                     return memo[key] = true;
@@ -58,16 +59,17 @@ struct AFA {
             for (auto &p : eps_succ)
                 if (!accepts_helper(p, pos, word, memo))
                     return memo[key] = false;
-            if (!at_end) {
+            if (at_end) {return memo[key] = accepting.count(q);}
+            else {
                 if (!sym_succ.empty()) {
                     for (auto &p : sym_succ)
                         if (!accepts_helper(p, pos+1, word, memo))
                             return memo[key] = false;
-                } else {
+                } else if (eps_succ.empty()) {
                     return memo[key] = false;
                 }
             }
-            return memo[key] = true;
+            return true;
         }
     }
 

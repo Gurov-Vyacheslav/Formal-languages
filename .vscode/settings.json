@@ -3,6 +3,7 @@
         "xstring": "cpp",
         "type_traits": "cpp",
         "utility": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "xtree": "cpp"
     }
 }
