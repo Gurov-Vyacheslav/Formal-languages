@@ -4,6 +4,7 @@
         "type_traits": "cpp",
         "utility": "cpp",
         "vector": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "random": "cpp"
     }
 }

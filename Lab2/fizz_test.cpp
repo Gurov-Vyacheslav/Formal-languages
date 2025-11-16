@@ -91,7 +91,7 @@ string random_word(const vector<char>& alphabet, int max_len, mt19937& rng) {
 
 int main() {
     const string EPS = "eps";
-    mt19937 rng(0);
+    mt19937 rng(random_device{}());
 
     set<char> alphabet = {'a','b'};
 
