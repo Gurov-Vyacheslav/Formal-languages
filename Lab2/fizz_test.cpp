@@ -12,17 +12,24 @@ using namespace std;
 
 struct AFA {
     set<string> states;
-    set<char> alphabet;
     string start;
     map<string, map<string, set<string>>> transitions;
     set<string> accepting;
     map<string, string> state_type; 
 
     set<string> delta(const string& q, const string& a) {
-        if (transitions.count(q) && transitions[q].count(a))
-            return transitions[q][a];
-        return {};
+        set<string> result;
+
+        if (transitions.count(q)) {
+            if (transitions[q].count(a))
+                result.insert(transitions[q][a].begin(), transitions[q][a].end());
+            if (transitions[q].count(".") && a != "eps")
+                result.insert(transitions[q]["."].begin(), transitions[q]["."].end());
+        }
+
+        return result;
     }
+
 
     bool accepts_helper(const string& q, int pos, const string& word,
                         map<pair<string,int>, bool>& memo) {
@@ -91,9 +98,8 @@ string random_word(const vector<char>& alphabet, int max_len, mt19937& rng) {
 
 int main() {
     const string EPS = "eps";
+    const string ALL = ".";
     mt19937 rng(random_device{}());
-
-    set<char> alphabet = {'a','b'};
 
     // ---------------- DFA -------------------
     set<string> statesDFA = {"q0","q1","q2","q3","q4","q5","q6"};
@@ -109,7 +115,7 @@ int main() {
     set<string> acceptingDFA = {"q0","q2","q6"};
     map<string,string> state_type_empty;
 
-    AFA dfa{statesDFA, alphabet, "q0", transitionsDFA, acceptingDFA, state_type_empty};
+    AFA dfa{statesDFA, "q0", transitionsDFA, acceptingDFA, state_type_empty};
 
     // ---------------- NFA -------------------
     set<string> statesNFA = {"q0","q1","q2","q3","q4","q5"};
@@ -122,7 +128,7 @@ int main() {
         {"q5", {{"a",{"q1"}}, {"b",{"q1","q4"}}}}
     };
     set<string> acceptingNFA = {"q0","q2","q5"};
-    AFA nfa{statesNFA, alphabet, "q0", transitionsNFA, acceptingNFA, state_type_empty};
+    AFA nfa{statesNFA, "q0", transitionsNFA, acceptingNFA, state_type_empty};
 
     // ---------------- AFA -------------------
     set<string> statesAFA = {"&","p0","q0","q1","q2","q3"};
@@ -136,13 +142,28 @@ int main() {
     };
     map<string,string> state_typeAFA = {{"&","AND"}, {"p0","OR"},{"q0","OR"},{"q1","OR"},{"q2","OR"},{"q3","OR"}};
     set<string> acceptingAFA = {"&","q0","q3"};
-    AFA afa{statesAFA, alphabet, "&", transitionsAFA, acceptingAFA, state_typeAFA};
+    AFA afa{statesAFA, "&", transitionsAFA, acceptingAFA, state_typeAFA};
 
-    string reg0 = "((aa|ba)(ab)*(bb)*)*";
-    string reg1 = "^(?=[ab]*$)(.a(ab)*(bb)*)*$";
+    // ---------------- reg_extended -------------------
+    set<string> states_reg_extended= {"&","p0","q0","q1","q2","q3","q4"};
+    map<string,map<string,set<string>>> transitions_reg_extended = {
+        {"&", {{ALL,{"q0"}}, {"a",{"p0"}}, {"b",{"p0"}}}},
+        {"p0", {{"a",{"p0"}}, {"b",{"p0"}}}},
+        {"q0", {{"a",{"q1"}}}},
+        {"q1", {{"a",{"q2"}}, {"b",{"q3"}}, {ALL,{"q0"}}}},
+        {"q2", {{"b",{"q1"}}}},
+        {"q3", {{"b",{"q4"}}}},
+        {"q4", {{ALL,{"q0"}}, {"b",{"q3"}}}}
+    };
+    map<string,string> state_type_reg_extended= {{"&","AND"}, {"p0","OR"},{"q0","OR"},{"q1","OR"},{"q2","OR"},{"q3","OR"},{"q4","OR"}};
+    set<string> accepting_reg_extended = {"&","q1","q4", "p0"};
+    AFA reg_extended {states_reg_extended, "&", transitions_reg_extended, accepting_reg_extended, state_type_reg_extended};
+    // ---------------- reg_original -------------------
+    string reg_original = "((aa|ba)(ab)*(bb)*)*";
 
     int n = 10;
     int max_len = 12;
+    //условно все возможные символы
     vector<char> alphabet_all;
     for(char c='a';c<='z';c++) alphabet_all.push_back(c);
     vector<char> alphabet_ab = {'a','b'};
@@ -152,22 +173,23 @@ int main() {
         string w_all = random_word(alphabet_all, max_len, rng);
 
         for(string w : {w_ab,w_all}) {
-            regex re0(reg0);
-            regex re1(reg1);
+            regex re0(reg_original);
+
 
             bool expected = regex_match(w, re0);
             bool result_dfa = dfa.accepts(w);
             bool result_nfa = nfa.accepts(w);
             bool result_afa = afa.accepts(w);
-            bool result_reg1 = regex_match(w, re1);
+            bool result_reg_extended = reg_extended.accepts(w);
 
-            if (!(result_dfa == result_nfa && result_nfa == result_afa && result_afa == expected)) {
-                cout << "Discrepancy on the word" << w << ":\n";
+            if (!(result_dfa == result_nfa && result_nfa == result_afa 
+                && result_afa == result_reg_extended && result_reg_extended == expected)) {
+                cout << "Discrepancy on the word - " << w << ":\n";
                 cout << "  reg0      : " << expected << "\n";
                 cout << "  DFA       : " << result_dfa << "\n";
                 cout << "  NFA       : " << result_nfa << "\n";
                 cout << "  AFA       : " << result_afa << "\n";
-                cout << "  reg1      : " << result_reg1 << "\n";
+                cout << "  reg1      : " << result_reg_extended << "\n";
             } else {
                 cout << "The result matched. Word: " << w << " - " << expected << "\n";
             }
