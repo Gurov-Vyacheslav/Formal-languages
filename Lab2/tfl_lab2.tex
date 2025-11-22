@@ -152,15 +152,11 @@ $\varepsilon$ & - & - & - & - & - & \textbf{+}  \\
 
 \newpage
 \section*{Малый ПКА}
-
-Более сложные пересечения языков приводят к автомату с большим числом состояний. Минимальный из рассмотренных автоматов был построен для следующего случая.
-
 Исходный язык, заданный регулярным выражением, можно представить как пересечение двух языков:
 \begin{enumerate}
-\item Исходный язык.
+\item Язык, в котором слово либо пустое, либо начинается на aa или bb.
 \item Исходный язык, который не обязан начинаться с aa или ba (т. е. язык со словами четной длинны, в котором после четного количества букв не может идти bbab).
 \end{enumerate}
-Можно также пересечь 2 пункт с языком, в котором слова начинаются на ab или aa, но это даст +1 состояние.
 
 \begin{center}
 \begin{tikzpicture}[shorten >=1pt, node distance=2cm, on grid, auto]
@@ -170,12 +166,14 @@ $\varepsilon$ & - & - & - & - & - & \textbf{+}  \\
     
     % Первый автомат
     \node[state] (p0) [above right=of start] {$p_0$};
-    
+    \node[state] (T) [right=8 of p0] {$T$};
+    \node[state, accepting] (p1) [above right=2 of p0] {$p_1$};
     % Второй автомат
     \node[state, accepting] (q0) [below right=of start] {$q_0$};
     \node[state] (q1) [right=of q0] {$q_1$};
     \node[state] (q2) [below=of q1] {$q_2$};
     \node[state, accepting] (q3) [right=of q1] {$q_3$};
+    \node[state] (q4) [right=of q3] {$q_4$};
     
     % epsilon-переходы из начального состояния
     \path[->]
@@ -184,7 +182,10 @@ $\varepsilon$ & - & - & - & - & - & \textbf{+}  \\
     
     % Переходы первого автомата
     \path[->]
-        (p0) edge node {a} (q0)
+        (p0) edge [bend left=20] [above]node {a} (p1)
+        (p0) edge node {b} (T)
+        (p1) edge [loop right] node {a,b} ()
+        (T) edge [loop right] node {a,b} ()
         
     % Переходы второго автомата
     \path[->]
@@ -195,14 +196,16 @@ $\varepsilon$ & - & - & - & - & - & \textbf{+}  \\
         
         (q2) edge node [right] {a} (q0)
         (q2) edge node {b} (q3)
-        (q3) edge [bend right]  [above] node {a} (p0)
+        (q3) edge  [above] node {a} (q4)
         (q3) edge [bend left] [above] node {b} (q2)
+        (q4) edge [bend right=70] [above] node {a} (q0)
+        (q4) edge [bend right] [below] node {b} (T)
 \end{tikzpicture}
 \end{center}
 \textbf{Описание автомата:}
 \begin{itemize}
     \item Начальное состояние: $\&$
-    \item Конечные состояния: $\&$, $q_0$, $q_3$
+    \item Конечные состояния: $\&$, $p_1$, $q_0$, $q_3$
     \item Алфавит: $\{a, b\}$
 \end{itemize}
 \textbf{Таблица множеств классов эквивалентности:}
@@ -221,46 +224,7 @@ ab & - & - & - & - \\
 \hline
 \end{tabular}
 \end{center}
-Если необходим детерменизм всех состояний кроме состояния пересечения, то нужно добавить состояние ловушку:
-\begin{center}
-\begin{tikzpicture}[shorten >=1pt, node distance=2cm, on grid, auto]
-    % Начальное состояние ПКА
 
-     \node[state,accepting, initial, initial text=] (start) {$\&$};
-    
-    % Первый автомат
-    \node[state] (p0) [above right=of start] {$p_0$};
-    \node[state] (T) [right=4 of p0] {$T$};
-    % Второй автомат
-    \node[state, accepting] (q0) [below right=of start] {$q_0$};
-    \node[state] (q1) [right=of q0] {$q_1$};
-    \node[state] (q2) [below=of q1] {$q_2$};
-    \node[state, accepting] (q3) [right=of q1] {$q_3$};
-    
-    % epsilon-переходы из начального состояния
-    \path[->]
-        (start) edge [bend left] node {a,b} (p0)
-        (start) edge [bend right] node [below] {$\varepsilon$} (q0);
-    
-    % Переходы первого автомата
-    \path[->]
-        (p0) edge node {a} (q0)
-        (p0) edge [below]node {b} (T)
-        (T) edge [loop right] node {a,b} ()
-        
-    % Переходы второго автомата
-    \path[->]
-        (q0) edge node {a} (q1)
-        (q0) edge [bend right] [above] node {b} (q2)
-
-        (q1) edge [bend right =50] node [above] {a,b} (q0)
-        
-        (q2) edge node [right] {a} (q0)
-        (q2) edge node {b} (q3)
-        (q3) edge [bend right = 10]  [above] node {a} (p0)
-        (q3) edge [bend left] [above] node {b} (q2)
-\end{tikzpicture}
-\end{center}
 
 \newpage
 \section*{Расширенное регулярное выражение}
@@ -288,7 +252,7 @@ ab & - & - & - & - \\
     
     \path[->]
         (start) edge node {"."} (q0)
-        (start) edge node {a,b} (p0)
+        (start) edge node {$\varepsilon$} (p0)
 
         (p0) edge [loop right] node {a,b} ()
         

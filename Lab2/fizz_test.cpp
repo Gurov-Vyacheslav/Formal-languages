@@ -131,23 +131,26 @@ int main() {
     AFA nfa{statesNFA, "q0", transitionsNFA, acceptingNFA, state_type_empty};
 
     // ---------------- AFA -------------------
-    set<string> statesAFA = {"&","p0","q0","q1","q2","q3"};
+    set<string> statesAFA = {"&","p0","p1","T","q0","q1","q2","q3","q4"};
     map<string,map<string,set<string>>> transitionsAFA = {
-        {"&", {{EPS,{"q0"}}, {"a",{"p0"}}, {"b",{"p0"}}}},
-        {"p0", {{"a",{"q0"}}}},
+        {"&",  {{EPS,{"q0"}}, {"a",{"p0"}}, {"b",{"p0"}}}},
+        {"p0", {{"a",{"p1"}}, {"b",{"T"}}}},
+        {"p1", {{"a",{"p1"}}, {"b",{"p1"}}}},
+        {"T",  {{"a",{"T"}},  {"b",{"T"}}}},
         {"q0", {{"a",{"q1"}}, {"b",{"q2"}}}},
         {"q1", {{"a",{"q0"}}, {"b",{"q0"}}}},
         {"q2", {{"a",{"q0"}}, {"b",{"q3"}}}},
-        {"q3", {{"a",{"p0"}}, {"b",{"q2"}}}}
+        {"q3", {{"a",{"q4"}}, {"b",{"q2"}}}},
+        {"q4", {{"a",{"q0"}}, {"b",{"T"}}}}
     };
-    map<string,string> state_typeAFA = {{"&","AND"}, {"p0","OR"},{"q0","OR"},{"q1","OR"},{"q2","OR"},{"q3","OR"}};
-    set<string> acceptingAFA = {"&","q0","q3"};
+    map<string,string> state_typeAFA = {{"&","AND"}};
+    set<string> acceptingAFA = {"&","q0","q3", "p1"};
     AFA afa{statesAFA, "&", transitionsAFA, acceptingAFA, state_typeAFA};
 
     // ---------------- reg_extended -------------------
     set<string> states_reg_extended= {"&","p0","q0","q1","q2","q3","q4"};
     map<string,map<string,set<string>>> transitions_reg_extended = {
-        {"&", {{ALL,{"q0"}}, {"a",{"p0"}}, {"b",{"p0"}}}},
+        {"&", {{ALL,{"q0"}}, {EPS,{"p0"}}}},
         {"p0", {{"a",{"p0"}}, {"b",{"p0"}}}},
         {"q0", {{"a",{"q1"}}}},
         {"q1", {{"a",{"q2"}}, {"b",{"q3"}}, {ALL,{"q0"}}}},
@@ -155,7 +158,7 @@ int main() {
         {"q3", {{"b",{"q4"}}}},
         {"q4", {{ALL,{"q0"}}, {"b",{"q3"}}}}
     };
-    map<string,string> state_type_reg_extended= {{"&","AND"}, {"p0","OR"},{"q0","OR"},{"q1","OR"},{"q2","OR"},{"q3","OR"},{"q4","OR"}};
+    map<string,string> state_type_reg_extended= {{"&","AND"}};
     set<string> accepting_reg_extended = {"&","q1","q4", "p0"};
     AFA reg_extended {states_reg_extended, "&", transitions_reg_extended, accepting_reg_extended, state_type_reg_extended};
     // ---------------- reg_original -------------------
@@ -174,7 +177,6 @@ int main() {
 
         for(string w : {w_ab,w_all}) {
             regex re0(reg_original);
-
 
             bool expected = regex_match(w, re0);
             bool result_dfa = dfa.accepts(w);
