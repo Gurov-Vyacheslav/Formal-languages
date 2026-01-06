@@ -1,0 +1,279 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning,arrows}
+\usepackage{geometry}
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm}
+
+\begin{document}
+\shorthandoff{"}
+
+\begin{center}
+    {\LARGE \textbf{Отчет по лабораторной работе №2}}
+    
+    \vspace{0.5cm}
+    
+    {\large \textbf{Гуров Вячеслав ИУ9-52Б}}
+    
+    \vspace{0.3cm}
+    
+    {\large \textbf{Вариант 8}}
+\end{center}
+
+\section*{Исходное регулярное выражение}
+\[
+((aa|ba)(ab)^*(bb)^*)^*
+\]
+
+\section*{Детерминированный конечный автомат}
+
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt, node distance=3cm, on grid, auto]
+    \node[state, initial, initial text=, accepting] (q0) {$q_0$};
+    \node[state] (q1) [above right=of q0] {$q_1$};
+    \node[state, accepting] (q2) [right=of q1] {$q_2$};
+    \node[state] (q3) [below right=of q0] {$q_3$};
+    \node[state] (q4) [right=of q2] {$q_4$};
+    \node[state] (q5) [below right=of q2] {$q_5$};
+    \node[state, accepting] (q6) [left=of q5] {$q_6$};
+    
+    \path[->]
+        (q0) edge node {a,b} (q1)
+        
+        (q1) edge node {a} (q2)
+        (q1) edge node {b} (q3)
+        
+        (q2) edge node {a} (q4)
+        (q2) edge node [left] {b} (q5)
+        
+        (q3) edge [loop below] node {a,b} ()
+        
+        (q4) edge [bend right] node [above] {a,b} (q2)
+        
+        (q5) edge [bend right]  node [right] {a} (q2)
+        (q5) edge node [above] {b} (q6)
+        
+        (q6) edge [bend left] node [right] {a} (q1)
+        (q6) edge [bend right] node [below] {b} (q5);
+\end{tikzpicture}
+\end{center}
+
+\textbf{Описание автомата:}
+\begin{itemize}
+    \item Начальное состояние: $q_0$
+    \item Конечные состояния: $q_0$, $q_2$, $q_6$
+    \item Алфавит: $\{a, b\}$
+\end{itemize}
+
+\section*{Проверка минимальности ДКА}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Состояние/Слово & $\varepsilon$ & a & b & bab & bb & ab \\
+\hline
+$(q_0)\varepsilon$ & \textbf{+} & - & - & - & - & - \\
+\hline
+$(q_1)a$ & - & \textbf{+} & - & - & - & - \\
+\hline
+$(q_2)aa$ & \textbf{+} & - & - & - & \textbf{+} & \textbf{+} \\
+\hline
+$(q_3)ab$ & - & - & - & - & - & - \\
+\hline
+$(q_4)aaa$ & - & \textbf{+} & \textbf{+} & \textbf{+} & - & - \\
+\hline
+$(q_5)aab$ & - & \textbf{+} & \textbf{+} & - & - & - \\
+\hline
+$(q_6)aabb$ & \textbf{+} & - & - & - & \textbf{+} & - \\
+\hline
+\end{tabular}
+\end{center}
+Все строки попарно различны, следовательно автомат минимален.
+
+\section*{Малый НКА}
+
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt, node distance=3cm, on grid, auto]
+    \node[state, initial, initial text=, accepting] (q0) {$q_0$};
+    \node[state] (q1) [above right=of q0] {$q_1$};
+    \node[state, accepting] (q2) [right=of q1] {$q_2$};
+   
+    \node[state] (q3) [right=of q2] {$q_3$};
+    \node[state] (q4) [below right=of q2] {$q_4$};
+    \node[state, accepting] (q5) [left=of q4] {$q_5$};
+    
+    \path[->]
+        (q0) edge node {a,b} (q1)
+        
+        (q1) edge node {a} (q2)
+        
+        (q2) edge node {a} (q3)
+        (q2) edge node [right] {b} (q4)
+        (q2) edge [bend right] node [above] {a,b} (q1)
+        
+        (q3) edge [bend right] node [above] {b} (q2)
+        
+        (q4) edge node [above] {b} (q5)
+        
+        (q5) edge [bend left] node [right] {a,b} (q1)
+        (q5) edge [bend right] node [below] {b} (q4);
+\end{tikzpicture}
+\end{center}
+
+\textbf{Описание автомата:}
+\begin{itemize}
+    \item Начальное состояние: $q_0$
+    \item Конечные состояния: $q_0$, $q_2$, $q_5$
+    \item Алфавит: $\{a, b\}$
+\end{itemize}
+
+\textbf{Таблица множеств классов эквивалентности:}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+слово/суффикс & ab & bb & bab & b & a & $\varepsilon$ \\
+\hline
+aa & \textbf{+} & \textbf{+}  & - & - & - & \textbf{+}  \\
+\hline
+aabb & - & \textbf{+} & - & - & - & \textbf{+}  \\
+\hline
+aaa & - & - & \textbf{+}  & \textbf{+}  & \textbf{+} & - \\
+\hline
+aab & - & - & - & \textbf{+}  & \textbf{+}  & - \\
+\hline
+a & - & - & - & - & \textbf{+} & - \\
+\hline
+$\varepsilon$ & - & - & - & - & - & \textbf{+}  \\
+\hline
+\end{tabular}
+\end{center}
+
+\newpage
+\section*{Малый ПКА}
+Исходный язык, заданный регулярным выражением, можно представить как пересечение двух языков:
+\begin{enumerate}
+\item Язык, в котором слово либо пустое, либо начинается на aa или bb.
+\item Исходный язык, который не обязан начинаться с aa или ba (т. е. язык со словами четной длинны, в котором после четного количества букв не может идти bbab).
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt, node distance=2cm, on grid, auto]
+    % Начальное состояние ПКА
+
+     \node[state,accepting, initial, initial text=] (start) {$\&$};
+    
+    % Первый автомат
+    \node[state] (p0) [above right=of start] {$p_0$};
+    \node[state] (T) [right=8 of p0] {$T$};
+    \node[state, accepting] (p1) [above right=2 of p0] {$p_1$};
+    % Второй автомат
+    \node[state, accepting] (q0) [below right=of start] {$q_0$};
+    \node[state] (q1) [right=of q0] {$q_1$};
+    \node[state] (q2) [below=of q1] {$q_2$};
+    \node[state, accepting] (q3) [right=of q1] {$q_3$};
+    \node[state] (q4) [right=of q3] {$q_4$};
+    
+    % epsilon-переходы из начального состояния
+    \path[->]
+        (start) edge [bend left] node {a,b} (p0)
+        (start) edge [bend right] node [below] {$\varepsilon$} (q0);
+    
+    % Переходы первого автомата
+    \path[->]
+        (p0) edge [bend left=20] [above]node {a} (p1)
+        (p0) edge node {b} (T)
+        (p1) edge [loop right] node {a,b} ()
+        (T) edge [loop right] node {a,b} ()
+        
+    % Переходы второго автомата
+    \path[->]
+        (q0) edge node {a} (q1)
+        (q0) edge [bend right] [above] node {b} (q2)
+
+        (q1) edge [bend right =50] node [above] {a,b} (q0)
+        
+        (q2) edge node [right] {a} (q0)
+        (q2) edge node {b} (q3)
+        (q3) edge  [above] node {a} (q4)
+        (q3) edge [bend left] [above] node {b} (q2)
+        (q4) edge [bend right=70] [above] node {a} (q0)
+        (q4) edge [bend right] [below] node {b} (T)
+\end{tikzpicture}
+\end{center}
+\textbf{Описание автомата:}
+\begin{itemize}
+    \item Начальное состояние: $\&$
+    \item Конечные состояния: $\&$, $p_1$, $q_0$, $q_3$
+    \item Алфавит: $\{a, b\}$
+\end{itemize}
+\textbf{Таблица множеств классов эквивалентности:}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+слово/суффикс & $\varepsilon$ & bab & b & a \\
+\hline
+aaa  &- & \textbf{+} & \textbf{+} & \textbf{+}  \\
+\hline
+aab &- & - & \textbf{+} & \textbf{+}  \\
+\hline
+a & - &- & - & \textbf{+} \\
+\hline
+ab & - & - & - & - \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\newpage
+\section*{Расширенное регулярное выражение}
+
+Заметим, что $(aa|ba)$ эквивалентно $(a|b)a$, а $(a|b)$ можно записать как $[ab]$. Тогда расширенное регулярное выражение равно:
+
+\texttt{\^{}([ab]a(ab)*(bb)*)*\$}
+
+Можно пойти дальше и заменить $[ab]$ на wildcard-операцию "$.$", но тогда необходима операция предпросмотра, чтобы гарантировать, что всё слово состоит только из символов a и b:
+
+\texttt{\^{}(?=[ab]*\$)(.a(ab)*(bb)*)*\$}
+
+Данная запись использует положительный lookahead \texttt{(?=[ab]*\$)} для проверки, что все символы в строке принадлежат множеству $\{a,b\}$, и wildcard операцию "$.$" для сокращения записи.\\
+Новое регулярное выражение можно описать автоматом:
+\begin{center}
+\begin{tikzpicture}[shorten >=1pt, node distance=3cm, on grid, auto]
+    \node[state, initial, initial text=, accepting] (start) {$\&$};
+    \node[state, accepting] (p0) [below right=of start] {$p_0$};
+    \node[state] (q0) [above right=of start] {$q_0$};
+    \node[state, accepting] (q1) [right=of q0] {$q_1$};
+   
+    \node[state] (q2) [right=of q1] {$q_2$};
+    \node[state] (q3) [below right=of q1] {$q_3$};
+    \node[state, accepting] (q4) [left=of q3] {$q_4$};
+    
+    \path[->]
+        (start) edge node {"."} (q0)
+        (start) edge node {$\varepsilon$} (p0)
+
+        (p0) edge [loop right] node {a,b} ()
+        
+        (q0) edge node {a} (q1)
+        
+        (q1) edge node {a} (q2)
+        (q1) edge node [right] {b} (q3)
+        (q1) edge [bend right] node [above] {"."} (q0)
+        
+        (q2) edge [bend right] node [above] {b} (q1)
+        
+        (q3) edge node [above] {b} (q4)
+        
+        (q4) edge [bend left] node [right] {"."} (q0)
+        (q4) edge [bend right] node [below] {b} (q3);
+\end{tikzpicture}
+\end{center}
+\textbf{Описание автомата:}
+\begin{itemize}
+    \item Начальное состояние: $\&$
+    \item Конечные состояния: $\&$, $q_1$, $q_4$, $p_0$
+    \item  "." - любой символ
+\end{itemize}
+\end{document}
